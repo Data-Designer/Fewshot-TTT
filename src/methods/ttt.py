@@ -321,7 +321,7 @@ def main():
         for ex in all_examples[args.k:]:
             q = ex["input"]
             a = ex["target"]
-            eval_data.append({"question": q, "answer": a})
+            eval_data.append({"question": q, "answer": a}) # why the other becomes the eval set, only 10 for training?
 
         # Gather info from TASKS
         generation_length = info.get("generation_length", 128)
@@ -347,7 +347,7 @@ def main():
 
         # Populate our task_dict
         task_dict[task_name] = {
-            "correct_examples": correct_examples,
+            "correct_examples": correct_examples, # training samples; 他这里似乎是根据固定的In-context learning做的，并没有考虑过相关性啥的。
             "eval_questions": eval_questions,
             "eval_targets": eval_targets,
             "info": info,
@@ -381,7 +381,7 @@ def main():
                 ft_times[task_name] = 0.0
                 continue
 
-            # Construct an optional prefix (task instruction, etc.)
+            # Construct an optional prefix (task instruction, etc.); This is the in-context learning prefix
             prefix = (
                 f"{data_dict['task_prompt']} "
                 f"{data_dict['answer_format']}\n\n"
@@ -415,7 +415,7 @@ def main():
 
             # Finetune
             ft_start = time.perf_counter()
-            finetune_with_torchtune(config_filename)
+            finetune_with_torchtune(config_filename) # 看起来是离线的整体train了一次后，再进行test
             ft_end = time.perf_counter()
             ft_time = ft_end - ft_start
             ft_times[task_name] = ft_time
@@ -457,7 +457,7 @@ def main():
         eval_targets = data_dict["eval_targets"]
         output_dir = data_dict["output_dir"]
 
-        # If no correct examples, there's no adapter for this task => evaluate base model
+        # If no correct examples, there's no adapter for this task => evaluate base model, 没矫正过，直接用LLM.
         if not correct_examples:
             print(f"[PHASE 3] {task_name}: No correct examples -> evaluating base model (no adapter).")
             eval_start = time.perf_counter()
@@ -513,7 +513,7 @@ def main():
         else:
             # Majority vote with multiple permutations
             vote_preds = []
-            for _ in range(args.vote_permutations):
+            for _ in range(args.vote_permutations): # 使用最大扰动
                 prefix = build_inference_prompt(
                     correct_examples,
                     leave_one_out=args.leave_one_out,
