@@ -129,7 +129,7 @@ def create_torchtune_config(
 ) -> str:
     """
     Create a YAML config for Torchtune finetuning (LoRA).
-    We'll do multiple samples => steps_per_epoch = (#samples / batch_size).
+    We'll do multiple samples => steps_per_epoch = (#samples / batch_size). # 每个batch用一批，我们不太一样，我们每个sample都会重新train。
     """
     import yaml
 
@@ -403,7 +403,7 @@ def main():
                 model_dir=args.model_dir,
                 dataset_type=args.dataset_type,
                 task=task_name,
-                dataset_filename=dataset_filename,
+                dataset_filename=dataset_filename, # 每个数据集一套config
                 output_dir=data_dict["output_dir"],
                 batch_size=args.batch_size,
                 epochs=args.epochs,
