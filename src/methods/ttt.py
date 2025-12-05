@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-ttt.py
+ttt.py， 搞到最后才发现，其是搞了一堆context做上下文tuning，然后在测试的时候做next-token prediction。
 
 Implements the main TTT (Test-Time Training) method.
 1. Load tasks from the BIG-Bench-Hard (BBH) dataset.
