@@ -69,7 +69,7 @@ def create_ttt_dataset(
         for (q, a) in ex_list:
             # Each example has question/answer only (no chain-of-thought)
             text += f"Q: {q}\nA: {a}\n\n"
-        data_samples.append({"text": text})
+        data_samples.append({"text": text}) # 不同的顺序
 
     with open(dataset_filename, 'w') as f:
         json.dump(data_samples, f)
@@ -94,7 +94,7 @@ def build_inference_prompt(
         random.shuffle(examples_to_use)
 
     if leave_one_out and len(examples_to_use) > 1:
-        examples_to_use = examples_to_use[:-1]
+        examples_to_use = examples_to_use[:-1] # 省了最后一个
 
     prefix = ""
     for (q, a) in examples_to_use:
@@ -321,7 +321,7 @@ def main():
         for ex in all_examples[args.k:]:
             q = ex["input"]
             a = ex["target"]
-            eval_data.append({"question": q, "answer": a}) # why the other becomes the eval set, only 10 for training?
+            eval_data.append({"question": q, "answer": a}) # why the other becomes the eval set, only 10 for training? 前面10个一直做Context? 防止信息泄漏？
 
         # Gather info from TASKS
         generation_length = info.get("generation_length", 128)
@@ -495,7 +495,7 @@ def main():
         eval_start = time.perf_counter()
         if not args.majority_vote:
             # Single permutation
-            prefix = build_inference_prompt(
+            prefix = build_inference_prompt( # ？这里为啥要这么搞？。
                 correct_examples,
                 leave_one_out=args.leave_one_out,
                 shuffle_examples=args.shuffle
