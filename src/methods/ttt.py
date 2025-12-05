@@ -47,6 +47,7 @@ def create_ttt_dataset(
     shuffle_examples: bool
 ):
     """
+    注意，这里的目的是利用其进行！！！文本补全，只需要传入输入进行，让他自然的学习next token prediction.
     Create a multi-sample JSON dataset for Torchtune finetuning, with no chain-of-thought.
 
     - If shuffle_examples=True, each item will be a random permutation of correct_examples.
@@ -63,7 +64,7 @@ def create_ttt_dataset(
             random.shuffle(perm)
             ex_list = perm
         else:
-            ex_list = correct_examples
+            ex_list = correct_examples # 添加不同的前缀么？
 
         text = prefix
         for (q, a) in ex_list:
@@ -94,7 +95,7 @@ def build_inference_prompt(
         random.shuffle(examples_to_use)
 
     if leave_one_out and len(examples_to_use) > 1:
-        examples_to_use = examples_to_use[:-1] # 省了最后一个
+        examples_to_use = examples_to_use[:-1] # 防止模型过拟合到这K个实例，这样增加随机性
 
     prefix = ""
     for (q, a) in examples_to_use:
@@ -375,7 +376,7 @@ def main():
     else:
         print("=== PHASE 2: Multi-sample LoRA Finetuning ===")
         for task_name, data_dict in task_dict.items():
-            correct_examples = data_dict["correct_examples"]
+            correct_examples = data_dict["correct_examples"] # 10个前缀
             if not correct_examples:
                 print(f"[PHASE 2] No correct examples for {task_name}. Skipping finetune.")
                 ft_times[task_name] = 0.0
@@ -390,7 +391,7 @@ def main():
             dataset_filename = os.path.join(data_dict["output_dir"], f"{task_name}_ttt_dataset.json")
 
             # Build the multi-sample dataset with num_training_steps random shuffles
-            create_ttt_dataset(
+            create_ttt_dataset( # 乱排一下
                 prefix=prefix,
                 correct_examples=correct_examples,
                 num_training_steps=args.num_training_steps,
